@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+set -e
+export DN_WORKDIR=$(cd $(dirname $0) && pwd)
+# shellcheck source=common
+. "$DN_WORKDIR/common"
+
+if [[ "$OSTYPE" != *"$OS"* ]];
+then
+    echo "Detected ${OSTYPE} but must be on ${OS}. "
+    die
+fi
+
+cli_help() {
+  cli_name=${0##*/}
+  echo "${faint}
+  
+                                  ./((((/.            
+                                (///////////          
+                       ,(((((*///////////////.        
+                       /(((((////////////////,        
+                   (((((((((/////////////////////,    
+                 /(((((((((////////////////////////   
+                 /((((((((/////////////////////////   
+                  ,((((((/////////////////////////    
+                         \`\`\`\`\`\`\`\`\`\`\`\`\`\`\`\`  
+
+______                               _   _        _                          _    
+|  _  \                             | \ | |      | |                        | |   
+| | | | _ __  ___   __ _  _ __ ___  |  \| |  ___ | |_ __      __ ___   _ __ | | __
+| | | || '__|/ _ \ / _\` || '_ \` _ \ | . \` | / _ \| __|\ \ /\ / // _ \ | '__|| |/ /
+| |/ / | |  |  __/| (_| || | | | | || |\  ||  __/| |_  \ V  V /| (_) || |   |   < 
+|___/  |_|   \___| \__,_||_| |_| |_|\_| \_/ \___| \__|  \_/\_/  \___/ |_|   |_|\_\\
+
+
+${normal}${bold}DreamNetwork CLI (${orange}$(cat $DN_WORKDIR/VERSION)${normal})
+Version: $(cat $DN_WORKDIR/VERSION)
+https://github.com/DreamNetworkCloud/DreamNetwork-cli
+
+
+Commands:
+
+    - ${bold}${yellow}*          ${normal}Shows the help
+    
+    - ${bold}${yellow}start      ${normal}Start your DreamNetwork Node
+        ${blue}-d                       Start up DreamNetwork with Docker
+        -m [true/false]          Start DreamNetwork with multi-console feature
+        --xms [512M]             Set minimum RAM [Default: 512M]
+        --xmx [1024M]            Set maximum RAM [Default: 1024M]${normal}
+
+    - ${bold}${yellow}stop       ${normal}Stop your DreamNetwork Node
+        ${blue}-q                       Make a quiet exit 
+        -f                       Force exit (In emergency case!)${normal}
+
+    - ${bold}${yellow}config    ${normal}Configure the DreamNetwork's run settings
+        ${blue}-v [vim]                 Set the editor to use for editing the config file${normal}
+
+    - ${bold}${yellow}install   ${normal}Install the Network
+    - ${bold}${yellow}remove    ${normal}Uninstall the Network
+        ${blue}-f                       Force uninstall${normal}
+
+${orange}${negative}⛅ DreamNetwork © $(date +'%Y')${normal}
+
+Usage: $cli_name COMMAND (OPTIONS) (ARGS)...
+"
+  exit 1
+}
+
+verify_root(){
+    if [ "$UID" -ne "$UID_ROOT" ]
+    then
+    echo "${underline}[${red}FAILED${white}]${normal}${orange} You must a super user (root) to use the DreamNetwork-CLI."
+    exit 0
+    fi  
+}
+
+verify_root
+
+info "Logs available in the ${DN_LOG} file"
+
+case "$1" in
+  start|s)
+    "$DN_WORKDIR/commands/deploy" "$2"
+    ;;
+  install|i)
+    "$DN_WORKDIR/commands/install" "$2" "$3"
+    ;;
+  *)
+    cli_help
+    ;;
+esac

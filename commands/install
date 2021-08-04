@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+
+set -e
+. "$DN_WORKDIR/common"
+
+
+info "Installing DreamNetwork..."
+info ">> Checking if DreamNetwork is already installed installed"
+
+if test -f "/opt/jdk8/dreamnetwork"; then
+    error "Seems DreamNetwork JDK is already installed."
+    die "Please uninstall DreamNetwork with the following command: sudo dreamnetwork remove"
+else
+    success "DreamNetwork JDK8 seems not installed"
+fi
+
+if test -f "/opt/jdk8/dreamnetwork"; then
+    error "Seems DreamNetwork JDK is already installed."
+    die "Please uninstall DreamNetwork with the following command: sudo dreamnetwork remove"
+else
+    success "DreamNetwork JDK11 seems not installed"
+fi
+
+info ">> Checking OS"
+
+declare -A osInfo;
+osInfo[/etc/redhat-release]=yum
+osInfo[/etc/arch-release]=pacman
+osInfo[/etc/gentoo-release]=emerge
+osInfo[/etc/SuSE-release]=zypp
+osInfo[/etc/slackware-version]=pacman
+osInfo[/etc/lsb-release]=apt-get
+
+for f in ${!osInfo[@]}
+do
+    if [[ -f $f ]];then
+        PACKAGE_MANAGER=${osInfo[$f]}
+        success "Detected package manager: ${PACKAGE_MANAGER}"
+    fi
+done
+
+if [ -z ${PACKAGE_MANAGER} ];then
+    die "Unable to detect package manager or/and your OS isn't supported. Aborting."
+fi
+
+info ">> Updating system with ${PACKAGE_MANAGER}
+
+"
+#
+
+# Case to update system
+case ${PACKAGE_MANAGER} in
+    yum)
+        yum -y update
+        ;;
+    pacman)
+        pacman -Syu
+        ;;
+    apt-get)
+        apt-get update
+        apt-get -y upgrade
+        ;;
+    zypp)
+        zypper update
+        ;;
+    emerge)
+        emerge -uDN world
+        ;;
+    *)
+        die "Unable to detect package manager or/and your OS isn't supported. Aborting."
+        ;;
+esac
+
+
+case ${PACKAGE_MANAGER} in
+    yum)
+        yum install -y tar unzip wget git curl
+        ;;
+    pacman)
+        pacman -S --needed --noconfirm tar unzip wget git curl
+        ;;
+    apt-get)
+        apt-get install -y tar unzip wget git curl 
+        ;;
+    zypp)
+        zypper install -y tar unzip wget git curl
+        ;;
+    emerge)
+        emerge -v tar unzip wget git curl
+        
+        ;;
+    *)
+        die "Unable to install dependencies. Aborting."
+        ;;
+esac
+
+success "Successfully installed all dependencies needed."
+
+
+
+
+menu=$(whiptail \
+    --backtitle "DreamNetwork's Installation Program" \
+    --title "DreamNetwork" \
+    --menu "Please choose which JDK to install." 11 60 3  \
+    "OpenJDK8" "(Recommanded)" \
+    "OpenJDK11" "(Not compatible yet)" \
+    "Custom" "(Expert only)" 3>&1 1>&2 2>&3)
+
+
+case $menu in 
+    "OpenJDK8")
+        info ">> Installing OpenJDK 8 LTS (8u302)"
+        cd $DN_WORKDIR/temp
+        info "Entered in the temp DN Repertory"
+        sudo rm -rf jdk* && sudo rm -rf java*
+        success "Deleted all jdk* or java* in the DN directory."
+        wget https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u302-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u302b08.tar.gz
+        #wget -O- -q -T 1 -t 1 https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u302-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u302b08.tar.gz.sha256.txt | sha256sum -c
+        #read -p "Please verify if the checksum is OK ..."
+        mv OpenJDK* java_8_DreamNetwork.tar.gz
+        if test -f "${DN_WORKDIR}/temp/java_8_DreamNetwork.tar.gz"; then
+            success "Downloaded OpenJDK 8 LTS (8u302) successfully."
+        else
+            die "Unable to download OpenJDK 8 LTS (8u302). Aborting."
+        fi        
+        info "Unzipping the archive"
+        tar -xzf java_8_DreamNetwork.tar.gz -C "${DN_WORKDIR}/temp"
+        
+        info "Renaming the folder"
+        mv jdk8* jdk8
+        if test -f "${DN_WORKDIR}/temp/jdk8/bin/java"; then
+            success "Unzipped and renamed OpenJDK 8 LTS (8u302) successfully."
+        else
+            die "Unable to Unzip and rename OpenJDK 8 LTS (8u302). Aborting."
+        fi
+        
+        info "Moving the JDK8 folder to the /opt/ folder"
+        sudo mv $DN_WORKDIR/temp/jdk8 /opt/
+        sudo chown -R root:root /opt/jdk8
+        sudo chmod -R 755 /opt/jdk8
+        sudo touch /opt/jdk8/dreamnetwork
+        success "Moved the OpenJDK 8 LTS (8u302) to the /opt/ folder."
+        
+        if test -f "/home/${SUDO_USER}/.bashrc"; then
+            info "Editing the /home/${SUDO_USER}/.bashrc file"
+            echo 'export PATH=/opt/jdk8/bin:$PATH' >> /home/$SUDO_USER/.bashrc
+            echo 'export JAVA_HOME=/opt/jdk8' >> /home/$SUDO_USER/.bashrc
+            source /home/$SUDO_USER/.bashrc
+            info "Editing the /root/.bashrc file"
+            sudo echo 'export PATH=/opt/jdk8/bin:$PATH' >> /root/.bashrc
+            sudo echo 'export JAVA_HOME=/opt/jdk8' >> /root/.bashrc
+            sudo -s source /etc/environment
+            success "Edited the /home/${SUDO_USER}/.bashrc and /root/.bashrc files successfully."
+            sudo -H -u $SUDO_USER bash -c '/opt/jdk8/bin/java -version'
+        else
+            info "Editing the /root/.bashrc file"
+            echo 'export PATH=/opt/jdk8/bin:$PATH' >> /root/.bashrc
+            echo 'export JAVA_HOME=/opt/jdk8' >> /root/.bashrc
+            success "Edited the /root/.bashrc successfully."
+            info $(/bin/bash -c '/opt/jdk8/bin/java -version')
+        fi
+    
+        if [ $? -eq 0 ]; then
+            success "Installed JDK8 with success."
+        else
+            die "Unable to access to JDK8. Aborting."
+        fi
+
+
+        ;;
+    "OpenJDK11")
+        info ">> Installing OpenJDK 11 (11.0.12)"
+        wget -O java_11_DreamNetwork.tar.gz https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz
+        ;;
+esac
