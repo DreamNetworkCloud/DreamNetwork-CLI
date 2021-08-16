@@ -14,7 +14,7 @@ else
     success "DreamNetwork JDK8 seems not installed"
 fi
 
-if test -f "/opt/jdk8/dreamnetwork"; then
+if test -f "/opt/jdk11/dreamnetwork"; then
     error "Seems DreamNetwork JDK is already installed."
     die "Please uninstall DreamNetwork with the following command: sudo dreamnetwork remove"
 else
