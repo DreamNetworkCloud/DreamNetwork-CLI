@@ -110,7 +110,12 @@ menu=$(whiptail \
 
 case $menu in 
     "OpenJDK8")
+
         info ">> Installing OpenJDK 8 LTS (8u302)"
+        java -version
+        if [ $? -eq 0 ]; then
+            die "You have already a Java installed on your server. Please delete it or use Custom JDK."
+        fi
         cd $DN_WORKDIR/temp
         info "Entered in the temp DN Repertory"
         sudo rm -rf jdk* && sudo rm -rf java*
@@ -142,6 +147,7 @@ case $menu in
         sudo touch /opt/jdk8/dreamnetwork
         success "Moved the OpenJDK 8 LTS (8u302) to the /opt/ folder."
         
+        
         # if test -f "/home/${SUDO_USER}/.bashrc"; then
         #     info "Editing the /home/${SUDO_USER}/.bashrc file"
         #     echo 'export PATH=/opt/jdk8/bin:$PATH' >> /home/$SUDO_USER/.bashrc
@@ -161,7 +167,7 @@ case $menu in
         #     info $(/bin/bash -c '/opt/jdk8/bin/java -version')
         # fi
 
-        ln -s /usr/bin/ /opt/jdk8/bin/
+        ln -s /opt/jdk8/bin/java /usr/bin/java
 
         info $(/bin/bash -c 'java -version')
         java -version
@@ -178,3 +184,5 @@ case $menu in
         wget -O java_11_DreamNetwork.tar.gz https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz
         ;;
 esac
+
+
