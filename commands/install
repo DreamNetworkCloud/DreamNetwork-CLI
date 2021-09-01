@@ -112,8 +112,8 @@ case $menu in
     "OpenJDK8") 
 
         info ">> Installing OpenJDK 8 LTS (8u302)"
-        java -version
-        if [ $? -eq 0 ]; then
+        if ! command -v java &> /dev/null
+        then
             die "You have already a Java installed on your server. Please delete it or use Custom JDK."
         else 
             install_jdk8
