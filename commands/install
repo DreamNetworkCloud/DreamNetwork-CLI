@@ -108,27 +108,6 @@ menu=$(whiptail \
     "Custom" "(Expert only)" 3>&1 1>&2 2>&3)
 
 
-case $menu in 
-    "OpenJDK8") 
-
-        info ">> Installing OpenJDK 8 LTS (8u302)"
-        if ! [ -x "$(command -v java)" ]; then
-        then
-            install_jdk8
-        else 
-            die "You have already a Java installed on your server. Please delete it or use Custom JDK."
-        fi
-        
-
-
-        ;;
-    "OpenJDK11")
-        info ">> Installing OpenJDK 11 (11.0.12)"
-        wget -O java_11_DreamNetwork.tar.gz https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz
-        ;;
-esac
-
-
 install_jdk8(){
     cd $DN_WORKDIR/temp
         info "Entered in the temp DN Repertory"
@@ -191,3 +170,22 @@ install_jdk8(){
             die "Unable to access to JDK8. Aborting."
         fi
 }
+case $menu in 
+    "OpenJDK8") 
+
+        info ">> Installing OpenJDK 8 LTS (8u302)"
+        if ! [ -x "$(command -v java)" ]; then
+            install_jdk8
+        else 
+            die "You have already a Java installed on your server. Please delete it or use Custom JDK."
+        fi
+        
+
+
+        ;;
+    "OpenJDK11")
+        info ">> Installing OpenJDK 11 (11.0.12)"
+        wget -O java_11_DreamNetwork.tar.gz https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz
+        ;;
+esac
+
