@@ -72,7 +72,6 @@ if [ "$UID" -ne "$UID_ROOT" ]
 fi  
 
 
-verify_root
 
 info "Logs available in the ${DN_LOG} file"
 
