@@ -109,14 +109,28 @@ menu=$(whiptail \
 
 
 case $menu in 
-    "OpenJDK8")
+    "OpenJDK8") 
 
         info ">> Installing OpenJDK 8 LTS (8u302)"
         java -version
         if [ $? -eq 0 ]; then
             die "You have already a Java installed on your server. Please delete it or use Custom JDK."
+        else 
+            install_jdk8
         fi
-        cd $DN_WORKDIR/temp
+        
+
+
+        ;;
+    "OpenJDK11")
+        info ">> Installing OpenJDK 11 (11.0.12)"
+        wget -O java_11_DreamNetwork.tar.gz https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz
+        ;;
+esac
+
+
+install_jdk8(){
+    cd $DN_WORKDIR/temp
         info "Entered in the temp DN Repertory"
         sudo rm -rf jdk* && sudo rm -rf java*
         success "Deleted all jdk* or java* in the DN directory."
@@ -176,13 +190,4 @@ case $menu in
         else
             die "Unable to access to JDK8. Aborting."
         fi
-
-
-        ;;
-    "OpenJDK11")
-        info ">> Installing OpenJDK 11 (11.0.12)"
-        wget -O java_11_DreamNetwork.tar.gz https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.12%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz
-        ;;
-esac
-
-
+}
