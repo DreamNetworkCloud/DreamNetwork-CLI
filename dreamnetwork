@@ -65,13 +65,12 @@ Usage: $cli_name COMMAND (OPTIONS) (ARGS)...
   exit 1
 }
 
-verify_root(){
-    if [ "$UID" -ne "$UID_ROOT" ]
-    then
-    echo "${underline}[${red}FAILED${white}]${normal}${orange} You must a super user (root) to use the DreamNetwork-CLI."
+if [ "$UID" -ne "$UID_ROOT" ]
+  then
+    echo "${underline}[${red}FAILED${white}]${normal}${orange} You must be a super user (root) to use the DreamNetwork-CLI."
     exit 0
-    fi  
-}
+fi  
+
 
 verify_root
 

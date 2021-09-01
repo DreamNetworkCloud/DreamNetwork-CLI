@@ -30,7 +30,7 @@ osInfo[/etc/gentoo-release]=emerge
 osInfo[/etc/SuSE-release]=zypp
 osInfo[/etc/slackware-version]=pacman
 osInfo[/etc/lsb-release]=apt-get
-
+osInfo[/etc/debian_version]=apt-get
 for f in ${!osInfo[@]}
 do
     if [[ -f $f ]];then
@@ -74,19 +74,19 @@ esac
 
 case ${PACKAGE_MANAGER} in
     yum)
-        yum install -y tar unzip wget git curl
+        yum install -y tar unzip wget git curl sudo 
         ;;
     pacman)
-        pacman -S --needed --noconfirm tar unzip wget git curl
+        pacman -S --needed --noconfirm tar unzip wget git curl sudo 
         ;;
     apt-get)
-        apt-get install -y tar unzip wget git curl 
+        apt-get install -y tar unzip wget git curl sudo
         ;;
     zypp)
-        zypper install -y tar unzip wget git curl
+        zypper install -y tar unzip wget git curl sudo 
         ;;
     emerge)
-        emerge -v tar unzip wget git curl
+        emerge -v tar unzip wget git curl sudo
         
         ;;
     *)
@@ -142,25 +142,29 @@ case $menu in
         sudo touch /opt/jdk8/dreamnetwork
         success "Moved the OpenJDK 8 LTS (8u302) to the /opt/ folder."
         
-        if test -f "/home/${SUDO_USER}/.bashrc"; then
-            info "Editing the /home/${SUDO_USER}/.bashrc file"
-            echo 'export PATH=/opt/jdk8/bin:$PATH' >> /home/$SUDO_USER/.bashrc
-            echo 'export JAVA_HOME=/opt/jdk8' >> /home/$SUDO_USER/.bashrc
-            source /home/$SUDO_USER/.bashrc
-            info "Editing the /root/.bashrc file"
-            sudo echo 'export PATH=/opt/jdk8/bin:$PATH' >> /root/.bashrc
-            sudo echo 'export JAVA_HOME=/opt/jdk8' >> /root/.bashrc
-            sudo -s source /etc/environment
-            success "Edited the /home/${SUDO_USER}/.bashrc and /root/.bashrc files successfully."
-            sudo -H -u $SUDO_USER bash -c '/opt/jdk8/bin/java -version'
-        else
-            info "Editing the /root/.bashrc file"
-            echo 'export PATH=/opt/jdk8/bin:$PATH' >> /root/.bashrc
-            echo 'export JAVA_HOME=/opt/jdk8' >> /root/.bashrc
-            success "Edited the /root/.bashrc successfully."
-            info $(/bin/bash -c '/opt/jdk8/bin/java -version')
-        fi
-    
+        # if test -f "/home/${SUDO_USER}/.bashrc"; then
+        #     info "Editing the /home/${SUDO_USER}/.bashrc file"
+        #     echo 'export PATH=/opt/jdk8/bin:$PATH' >> /home/$SUDO_USER/.bashrc
+        #     echo 'export JAVA_HOME=/opt/jdk8' >> /home/$SUDO_USER/.bashrc
+        #     source /home/$SUDO_USER/.bashrc
+        #     info "Editing the /root/.bashrc file"
+        #     sudo echo 'export PATH=/opt/jdk8/bin:$PATH' >> /root/.bashrc
+        #     sudo echo 'export JAVA_HOME=/opt/jdk8' >> /root/.bashrc
+        #     sudo -s source /etc/environment
+        #     success "Edited the /home/${SUDO_USER}/.bashrc and /root/.bashrc files successfully."
+        #     sudo -H -u $SUDO_USER bash -c '/opt/jdk8/bin/java -version'
+        # else
+        #     info "Editing the /root/.bashrc file"
+        #     echo 'export PATH=/opt/jdk8/bin:$PATH' >> /root/.bashrc
+        #     echo 'export JAVA_HOME=/opt/jdk8' >> /root/.bashrc
+        #     success "Edited the /root/.bashrc successfully."
+        #     info $(/bin/bash -c '/opt/jdk8/bin/java -version')
+        # fi
+
+        ln -s /usr/bin/ /opt/jdk8/bin/
+
+        info $(/bin/bash -c 'java -version')
+        java -version
         if [ $? -eq 0 ]; then
             success "Installed JDK8 with success."
         else
